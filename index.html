@@ -4,49 +4,178 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Life Partner</title>
-
   <style>
-    body{margin:0;padding:0;font-family:sans-serif;background:#ffe9f7;text-align:center;}
+    :root{
+      --pink:#ff4d88;
+      --bg:#ffeef6;
+      --card:#fff;
+    }
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans",Arial;background:var(--bg);color:#222}
     .card{
-      margin:40px auto;padding:25px;background:white;border-radius:12px;
-      max-width:500px;box-shadow:0 5px 20px rgba(0,0,0,0.1);position:relative;
+      max-width:600px;margin:36px auto;padding:20px;background:var(--card);border-radius:12px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.08);position:relative;text-align:center;
     }
-    .title{font-size:20px;font-weight:600;color:#444;margin-bottom:10px;}
-    .name{font-size:28px;font-weight:800;color:#222;margin:10px 0;}
+    .title{font-weight:700;margin:6px 0;color:#444}
+    #nameBox{font-size:28px;font-weight:800;margin:8px 0}
+    input#nameInput{width:68%;padding:10px;border-radius:8px;border:1px solid #cfcfcf;font-size:16px;outline:none}
+    .set-btn{margin-left:8px;padding:10px 14px;border-radius:8px;border:0;background:var(--pink);color:#fff;font-weight:700;cursor:pointer}
     .ok-btn{
-      position:absolute;right:20px;top:50%;transform:translateY(-50%);
-      background:#ff4d88;color:white;padding:12px 18px;border:none;border-radius:10px;
-      font-weight:700;cursor:pointer;
+      position:absolute;right:18px;top:50%;transform:translateY(-50%);background:var(--pink);
+      color:#fff;border:none;padding:12px 16px;border-radius:10px;font-weight:800;cursor:pointer;
+      box-shadow:0 6px 18px rgba(255,77,136,0.18);
     }
+
+    /* small immediate toast message */
+    #toast{
+      position:fixed;left:50%;transform:translateX(-50%);top:20px;
+      background:rgba(0,0,0,0.78);color:#fff;padding:10px 16px;border-radius:8px;display:none;z-index:3000;
+      font-weight:700;
+    }
+
+    /* Modal */
     #modalBG{
-      position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;
-      align-items:center;justify-content:center;z-index:1000;
+      position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:2000;
     }
-    #modalBG img{max-width:90%;border-radius:12px;}
+    .modalCard{
+      position:relative;max-width:920px;width:92%;border-radius:10px;overflow:hidden;background:#000;
+      display:flex;align-items:center;justify-content:center;padding:0;
+    }
+    .modalCard img{width:100%;height:auto;display:block;object-fit:contain;filter:brightness(0.95);}
+
+    /* overlay text on image */
+    .overlayText{
+      position:absolute;left:50%;top:16%;transform:translateX(-50%);text-align:center;color:#fff;
+      text-shadow:0 6px 24px rgba(0,0,0,0.6);
+      z-index:2500;
+    }
+    .overlayName{font-size:36px;font-weight:900;margin-bottom:8px}
+    .overlaySub{font-size:20px;font-weight:700;background:rgba(0,0,0,0.25);padding:6px 12px;border-radius:8px;display:inline-block}
+
+    .closeBtn{
+      position:absolute;right:10px;top:8px;background:rgba(255,255,255,0.9);border:0;border-radius:6px;padding:6px 10px;cursor:pointer;font-weight:800;z-index:2600;
+    }
+
+    @media(max-width:520px){
+      .overlayName{font-size:24px}
+      .overlaySub{font-size:16px}
+      input#nameInput{width:60%}
+    }
   </style>
 </head>
 <body>
 
-<div class="card">
-  <div class="title">अपना life partner को देखो</div>
-  <div class="name">Your Name Here</div>
+<div id="toast">रुको ज़रा — सब्र करो</div>
+
+<div class="card" role="main" aria-labelledby="nameBox">
   <div class="title">अपना life partner को देखो</div>
 
-  <button class="ok-btn" onclick="openImg()">OK</button>
+  <!-- यहाँ डिफ़ॉल्ट नाम दिखेगा, user set कर सकता है -->
+  <div id="nameBox">Your Name Here</div>
+
+  <div class="title">अपना life partner को देखो</div>
+
+  <!-- OK button (image open के लिए) -->
+  <button class="ok-btn" id="okOpen" aria-label="Open image">OK</button>
+
+  <!-- नाम set करने के लिए input -->
+  <div style="margin-top:12px;">
+    <input id="nameInput" type="text" placeholder="अपना नाम लिखिए..." aria-label="Enter your name">
+    <button class="set-btn" id="setNameBtn">Set Name</button>
+  </div>
 </div>
 
-<div id="modalBG" onclick="closeImg()">
-  <img src="1765008556393.jpg" alt="image">
+<!-- Modal (image + overlay text) -->
+<div id="modalBG" role="dialog" aria-modal="true" aria-hidden="true" onclick="closeModal(event)">
+  <div class="modalCard" onclick="event.stopPropagation()">
+    <button class="closeBtn" onclick="hideModal()">✕</button>
+    <!-- overlay texts (will be filled by JS) -->
+    <div class="overlayText" id="overlayText">
+      <div class="overlayName" id="overlayName">नाम यहाँ आएगा</div>
+      <div class="overlaySub">ये है आपका life partner</div>
+    </div>
+
+    <!-- Change the src below if your image filename is different -->
+    <img id="partnerImg" src="1765008556393.jpg" alt="life partner image">
+  </div>
 </div>
 
 <script>
-function openImg(){
-  document.getElementById('modalBG').style.display='flex';
-}
-function closeImg(){
-  document.getElementById('modalBG').style.display='none';
-}
-</script>
+  // elements
+  const nameInput = document.getElementById('nameInput');
+  const setNameBtn = document.getElementById('setNameBtn');
+  const nameBox = document.getElementById('nameBox');
+  const okOpen = document.getElementById('okOpen');
+  const modalBG = document.getElementById('modalBG');
+  const overlayName = document.getElementById('overlayName');
+  const toast = document.getElementById('toast');
 
+  // Load saved name from localStorage if exists (so refresh bhi name yaad rahe)
+  const saved = localStorage.getItem('lp_name');
+  if(saved){
+    nameBox.textContent = saved;
+    overlayName.textContent = saved;
+  }
+
+  // set name handler
+  setNameBtn.addEventListener('click', () => {
+    const v = nameInput.value.trim();
+    if(!v){
+      // if empty, give small shake + focus
+      nameInput.focus();
+      nameInput.style.borderColor = 'crimson';
+      setTimeout(()=> nameInput.style.borderColor = '#cfcfcf',800);
+      return;
+    }
+    nameBox.textContent = v;
+    overlayName.textContent = v;
+    localStorage.setItem('lp_name', v); // remember for later
+    nameInput.value = '';
+  });
+
+  // allow Enter key to set name
+  nameInput.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter'){
+      setNameBtn.click();
+    }
+  });
+
+  // OK open: show immediate toast "रुको ज़रा — सब्र करो", then after 3.5s open image modal with overlay
+  okOpen.addEventListener('click', () => {
+    // ensure overlay text updated from nameBox
+    const currentName = nameBox.textContent.trim() || 'Your Name';
+    overlayName.textContent = currentName;
+
+    // show short toast immediately
+    toast.style.display = 'block';
+    // hide toast after 3.2s (a bit before image appears)
+    setTimeout(()=> toast.style.display = 'none', 3200);
+
+    // wait 3.5 seconds then open modal
+    setTimeout(() => {
+      modalBG.style.display = 'flex';
+      modalBG.setAttribute('aria-hidden','false');
+    }, 3500);
+  });
+
+  // close modal
+  function hideModal(){
+    modalBG.style.display = 'none';
+    modalBG.setAttribute('aria-hidden','true');
+  }
+
+  // allow clicking outside modal to close
+  function closeModal(evt){
+    // click on backdrop closes
+    hideModal();
+  }
+
+  // Accessibility: ESC to close modal
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape'){
+      hideModal();
+    }
+  });
+
+</script>
 </body>
-</html>
+  </html>
