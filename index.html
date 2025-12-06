@@ -102,8 +102,7 @@
       border-radius:10px;
     }
 
-    /* overlay placed above the image (so face not covered)
-       using bottom:100% to place overlay box just above the image container */
+    /* overlay placed above the image (so face not covered) */
     .overlayBox{
       position:absolute;
       left:50%;
@@ -166,7 +165,7 @@
 
   <!-- main card -->
   <div class="card" role="main" aria-labelledby="welcomeName">
-    <p>अपना life partner को देखो</p>
+    
     <h1 id="welcomeName">Welcome</h1>
     <p>अपना life partner को देखो</p>
 
@@ -193,7 +192,7 @@
     </div>
   </div>
 
-  <!-- audio (your uploaded file) -->
+  <!-- audio (your uploaded file). controls NOT shown -->
   <audio id="bgMusic" src="audio.mp3" preload="auto"></audio>
 
   <script>
@@ -204,54 +203,95 @@
     const overlayName = document.getElementById('overlayName');
     const bgMusic = document.getElementById('bgMusic');
 
+    // fade helpers
+    let fadeInInterval = null;
+    let fadeOutInterval = null;
+
+    function fadeIn(audio, duration = 800) {
+      try {
+        clearInterval(fadeInInterval);
+        audio.volume = 0;
+        const step = 50;
+        const steps = Math.max(1, Math.floor(duration / step));
+        let cur = 0;
+        fadeInInterval = setInterval(() => {
+          cur++;
+          audio.volume = Math.min(1, (cur / steps));
+          if (cur >= steps) clearInterval(fadeInInterval);
+        }, step);
+      } catch(e){}
+    }
+
+    function fadeOutAndStop(audio, duration = 600) {
+      try {
+        clearInterval(fadeOutInterval);
+        const step = 50;
+        const steps = Math.max(1, Math.floor(duration / step));
+        let cur = steps;
+        fadeOutInterval = setInterval(() => {
+          audio.volume = Math.max(0, (cur / steps));
+          cur--;
+          if (cur <= 0) {
+            clearInterval(fadeOutInterval);
+            try{ audio.pause(); audio.currentTime = 0; }catch(e){}
+          }
+        }, step);
+      } catch(e){}
+    }
+
     openBtn.addEventListener('click', () => {
-      // read user input (do not change the "Welcome" header)
+      // get name
       let name = userInput.value.trim();
       if(!name) name = "Unknown";
 
-      // set overlay text (will appear above the image)
+      // set overlay text
       overlayName.textContent = name;
-
-      // play background music (user clicked -> autoplay allowed)
-      // handle promise for browsers that require gesture
-      if(bgMusic){
-        const playPromise = bgMusic.play();
-        if(playPromise !== undefined){
-          playPromise.catch(err => {
-            // if play fails (rare), ignore silently or you can show a message
-            console.log('Audio play failed:', err);
-          });
-        }
-      }
 
       // show toast immediately
       toast.style.display = 'block';
       setTimeout(()=> { toast.style.display = 'none'; }, 3000);
 
-      // open modal after 3.5s
+      // after delay open modal and THEN start music with fade-in
       setTimeout(()=> {
         modalBG.style.display = 'flex';
         modalBG.setAttribute('aria-hidden','false');
-        // ensure top alignment on small screens
+
+        // scroll to top so overlay aligns
         window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        // play + fade-in
+        try {
+          const promise = bgMusic.play();
+          if (promise !== undefined) {
+            promise.then(() => {
+              fadeIn(bgMusic, 900); // 0.9s fade-in
+            }).catch((err)=>{
+              // sometimes browsers block play; ignore silently
+              console.log('play blocked:', err);
+            });
+          } else {
+            fadeIn(bgMusic, 900);
+          }
+        } catch(e){
+          console.log('audio play error', e);
+        }
+
       }, 3500);
     });
 
-    // hide modal (and stop music)
+    // hide modal (fade out music)
     function hideModal(){
       modalBG.style.display = 'none';
       modalBG.setAttribute('aria-hidden','true');
-      // pause and reset music
+      // fade out then stop
       try{
-        bgMusic.pause();
-        bgMusic.currentTime = 0;
+        fadeOutAndStop(bgMusic, 600);
       }catch(e){}
     }
 
-    // close on ESC
     document.addEventListener('keydown', (e) => {
       if(e.key === 'Escape') hideModal();
     });
   </script>
 </body>
-    </html>
+        </html>
