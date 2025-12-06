@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Life Partner</title>
+
+  <style>
+    body{margin:0;padding:0;font-family:sans-serif;background:#ffe9f7;text-align:center;}
+    .card{
+      margin:40px auto;padding:25px;background:white;border-radius:12px;
+      max-width:500px;box-shadow:0 5px 20px rgba(0,0,0,0.1);position:relative;
+    }
+    .title{font-size:20px;font-weight:600;color:#444;margin-bottom:10px;}
+    .name{font-size:28px;font-weight:800;color:#222;margin:10px 0;}
+    .ok-btn{
+      position:absolute;right:20px;top:50%;transform:translateY(-50%);
+      background:#ff4d88;color:white;padding:12px 18px;border:none;border-radius:10px;
+      font-weight:700;cursor:pointer;
+    }
+    #modalBG{
+      position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;
+      align-items:center;justify-content:center;z-index:1000;
+    }
+    #modalBG img{max-width:90%;border-radius:12px;}
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="title">अपना life partner को देखो</div>
+  <div class="name">Your Name Here</div>
+  <div class="title">अपना life partner को देखो</div>
+
+  <button class="ok-btn" onclick="openImg()">OK</button>
+</div>
+
+<div id="modalBG" onclick="closeImg()">
+  <img src="1765008556393.jpg" alt="image">
+</div>
+
+<script>
+function openImg(){
+  document.getElementById('modalBG').style.display='flex';
+}
+function closeImg(){
+  document.getElementById('modalBG').style.display='none';
+}
+</script>
+
+</body>
+</html>
