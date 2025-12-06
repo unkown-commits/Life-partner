@@ -4,49 +4,73 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Life Partner</title>
+
   <style>
-    :root{
-      --pink:#ff4d88;
-      --bg:#ffeef6;
-      --card:#fff;
-    }
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans",Arial;background:var(--bg);color:#222}
+    body{margin:0;font-family:sans-serif;background:#ffeef6;text-align:center;}
+
     .card{
-      max-width:600px;margin:36px auto;padding:20px;background:var(--card);border-radius:12px;
-      box-shadow:0 10px 30px rgba(0,0,0,0.08);position:relative;text-align:center;
+      margin:20px auto;padding:20px;background:#fff;max-width:600px;
+      border-radius:12px;box-shadow:0 5px 20px rgba(0,0,0,0.1);position:relative;
     }
-    .title{font-weight:700;margin:6px 0;color:#444}
-    #welcomeName{font-size:28px;font-weight:800;margin:8px 0}
-    input#nameInput{width:80%;padding:10px;border-radius:8px;border:1px solid #cfcfcf;font-size:16px;outline:none;margin-top:10px}
+
+    #welcomeName{font-size:32px;font-weight:900;margin:5px 0;}
 
     .ok-btn{
-      position:absolute;right:18px;top:50%;transform:translateY(-50%);background:var(--pink);
-      color:#fff;border:none;padding:12px 16px;border-radius:10px;font-weight:800;cursor:pointer;
+      position:absolute;right:20px;top:50%;transform:translateY(-50%);
+      background:#ff4d88;color:#fff;border:none;padding:12px 16px;
+      border-radius:10px;font-weight:800;cursor:pointer;
     }
 
+    input{
+      margin-top:10px;width:80%;padding:10px;font-size:16px;
+      border:1px solid #ccc;border-radius:8px;
+    }
+
+    /* Toast */
     #toast{
-      position:fixed;left:50%;transform:translateX(-50%);top:20px;
-      background:rgba(0,0,0,0.78);color:#fff;padding:10px 16px;border-radius:8px;display:none;z-index:3000;
-      font-weight:700;
+      position:fixed;top:20px;left:50%;transform:translateX(-50%);
+      background:rgba(0,0,0,0.8);color:#fff;padding:10px 16px;
+      border-radius:8px;font-weight:700;display:none;z-index:3000;
     }
 
+    /* Modal */
     #modalBG{
-      position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:2000;
+      position:fixed;inset:0;background:rgba(0,0,0,0.6);
+      display:none;align-items:center;justify-content:center;
+      z-index:2000;
     }
+
     .modalCard{
-      position:relative;max-width:920px;width:92%;border-radius:10px;overflow:hidden;background:#000;
+      position:relative;max-width:800px;width:95%;
+      border-radius:12px;overflow:hidden;
     }
-    .modalCard img{width:100%;display:block;filter:brightness(0.90);}
-    .overlayText{
-      position:absolute;left:50%;top:16%;transform:translateX(-50%);text-align:center;color:#fff;
-      text-shadow:0 6px 24px rgba(0,0,0,0.6);
+
+    .modalCard img{
+      width:100%;display:block;
     }
-    .overlayName{font-size:32px;font-weight:900;margin-bottom:8px}
-    .overlaySub{font-size:20px;font-weight:700;background:rgba(0,0,0,0.25);padding:6px 12px;border-radius:8px;display:inline-block}
+
+    /* TEXT OVERLAY EXACTLY ON IMAGE TOP */
+    .overlayBox{
+      position:absolute;top:20px;left:50%;transform:translateX(-50%);
+      text-align:center;color:#fff;text-shadow:0 4px 15px rgba(0,0,0,0.8);
+      z-index:5000;
+    }
+
+    .overlayName{
+      font-size:32px;font-weight:900;margin-bottom:6px;
+    }
+
+    .overlaySub{
+      font-size:20px;font-weight:700;background:rgba(0,0,0,0.4);
+      padding:4px 10px;border-radius:8px;display:inline-block;
+    }
 
     .closeBtn{
-      position:absolute;right:10px;top:8px;background:rgba(255,255,255,0.9);border:0;border-radius:6px;padding:6px 10px;font-weight:800;cursor:pointer;
+      position:absolute;right:10px;top:10px;background:rgba(255,255,255,0.9);
+      border:0;padding:6px 10px;border-radius:6px;font-weight:900;
+      cursor:pointer;z-index:6000;
     }
+
   </style>
 </head>
 <body>
@@ -54,27 +78,26 @@
 <div id="toast">रुको ज़रा — सब्र करो</div>
 
 <div class="card">
-  <div class="title">अपना life partner को देखो</div>
+  <p>अपना life partner को देखो</p>
 
-  <!-- अब यहाँ हमेशा "Welcome" ही दिखेगा -->
-  <div id="welcomeName">Welcome</div>
+  <h1 id="welcomeName">Welcome</h1>
 
-  <div class="title">अपना life partner को देखो</div>
+  <p>अपना life partner को देखो</p>
 
-  <!-- OK button top-right -->
-  <button class="ok-btn" id="okBtn">OK</button>
+  <button class="ok-btn" id="openBtn">OK</button>
 
-  <!-- केवल नाम का input है, कोई Set Name बटन नहीं -->
-  <input id="nameInput" type="text" placeholder="अपना नाम लिखिए..." />
+  <input id="userName" type="text" placeholder="अपना नाम लिखिए...">
 </div>
 
-<!-- Modal -->
-<div id="modalBG" onclick="closeModal(event)">
+<!-- MODAL -->
+<div id="modalBG" onclick="hideModal()">
   <div class="modalCard" onclick="event.stopPropagation()">
+
     <button class="closeBtn" onclick="hideModal()">✕</button>
 
-    <div class="overlayText">
-      <div class="overlayName" id="overlayName">नाम यहाँ आएगा</div>
+    <!-- OVERLAY TEXT -->
+    <div class="overlayBox">
+      <div class="overlayName" id="overlayName">User Name</div>
       <div class="overlaySub">ये है आपका life partner</div>
     </div>
 
@@ -83,36 +106,33 @@
 </div>
 
 <script>
-const okBtn = document.getElementById('okBtn');
-const nameInput = document.getElementById('nameInput');
+const openBtn   = document.getElementById('openBtn');
+const modalBG   = document.getElementById('modalBG');
+const toast     = document.getElementById('toast');
+const userInput = document.getElementById('userName');
 const overlayName = document.getElementById('overlayName');
-const modalBG = document.getElementById('modalBG');
-const toast = document.getElementById('toast');
 
-okBtn.addEventListener('click', () => {
-  
-  let userName = nameInput.value.trim();
-  if(!userName){
-    userName = "Unknown"; // default if empty
+openBtn.addEventListener('click', () => {
+
+  let name = userInput.value.trim();
+  if(!name){
+    name = "Unknown User";
   }
-  overlayName.textContent = userName;
 
-  toast.style.display = 'block';
-  setTimeout(()=> toast.style.display = 'none', 3000);
+  overlayName.innerText = name;
 
-  setTimeout(()=>{
-    modalBG.style.display = 'flex';
+  toast.style.display = "block";
+  setTimeout(()=> toast.style.display="none", 3000);
+
+  setTimeout(()=> {
+    modalBG.style.display = "flex";
   }, 3500);
 });
 
 function hideModal(){
-  modalBG.style.display = 'none';
-}
-
-function closeModal(e){
-  hideModal();
+  modalBG.style.display = "none";
 }
 </script>
 
 </body>
-  </html>
+</html>
