@@ -84,30 +84,35 @@
       padding:16px;
     }
 
+    /* make modal card fit inside viewport and allow scrolling if image is tall */
     .modalCard{
       position:relative;
       width:100%;
       max-width:820px;
       border-radius:12px;
-      overflow:visible; /* allow overlay to sit above */
+      overflow:auto;          /* allow inner scroll for tall images */
       background:#000;
+      max-height:90vh;        /* never exceed viewport height */
+      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+      padding:12px;
     }
 
-    /* IMAGE */
+    /* IMAGE adjustments so the full image is visible and preserves aspect ratio */
     .modalCard img{
       display:block;
       width:100%;
       height:auto;
-      object-fit:cover;
+      max-height: calc(90vh - 80px); /* leave room for overlay/close button */
+      object-fit: contain;           /* scale to fit without cropping */
       border-radius:10px;
     }
 
-    /* overlay placed above the image (so face not covered) */
+    /* overlay placed above the image near top (won't cover face) */
     .overlayBox{
       position:absolute;
       left:50%;
-      bottom:100%;
-      transform:translate(-50%, -8px);
+      top:12px;
+      transform:translateX(-50%);
       text-align:center;
       color:#fff;
       z-index:5000;
@@ -161,7 +166,7 @@
 <body>
 
   <!-- toast -->
-  <div id="toast" role="status" aria-live="polite">रुको ज़रा — सब्र करो</div>
+  <div id="toast" role="status" aria-live="polite">तैयार हो जाइए...</div>
 
   <!-- main card -->
   <div class="card" role="main" aria-labelledby="welcomeName">
@@ -188,7 +193,7 @@
       </div>
 
       <!-- image (change filename if required) -->
-      <img src="1765016388300.jpg" alt="Life partner">
+      <img id="lifeImage" src="1765016388300.jpg" alt="Life partner">
     </div>
   </div>
 
@@ -202,6 +207,7 @@
     const userInput = document.getElementById('userName');
     const overlayName = document.getElementById('overlayName');
     const bgMusic = document.getElementById('bgMusic');
+    const lifeImage = document.getElementById('lifeImage');
 
     // fade helpers
     let fadeInInterval = null;
@@ -247,17 +253,17 @@
       // set overlay text
       overlayName.textContent = name;
 
-      // show toast immediately
+      // show toast briefly
       toast.style.display = 'block';
-      setTimeout(()=> { toast.style.display = 'none'; }, 3000);
+      setTimeout(()=> { toast.style.display = 'none'; }, 1800);
 
-      // after delay open modal and THEN start music with fade-in
+      // after small delay open modal and THEN start music with fade-in
       setTimeout(()=> {
         modalBG.style.display = 'flex';
         modalBG.setAttribute('aria-hidden','false');
 
-        // scroll to top so overlay aligns
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // If you prefer to ensure image is loaded before any layout, you can wait for load:
+        // But not necessary. If image is large, user can scroll inside modal.
 
         // play + fade-in
         try {
@@ -266,7 +272,7 @@
             promise.then(() => {
               fadeIn(bgMusic, 900); // 0.9s fade-in
             }).catch((err)=>{
-              // sometimes browsers block play; ignore silently
+              // browsers may block autoplay; if blocked, do nothing
               console.log('play blocked:', err);
             });
           } else {
@@ -276,7 +282,7 @@
           console.log('audio play error', e);
         }
 
-      }, 3500);
+      }, 900);
     });
 
     // hide modal (fade out music)
@@ -292,6 +298,20 @@
     document.addEventListener('keydown', (e) => {
       if(e.key === 'Escape') hideModal();
     });
+
+    // Optional: if image is very tall, ensure close button remains visible by scrolling modal to top
+    modalBG.addEventListener('transitionend', () => {
+      // no-op; kept for potential future enhancements
+    });
+
+    // Accessibility: focus close button when modal opens
+    openBtn.addEventListener('click', () => {
+      setTimeout(() => {
+        const closeBtn = document.querySelector('.closeBtn');
+        if(closeBtn) closeBtn.focus();
+      }, 600);
+    });
+
   </script>
 </body>
-        </html>
+  </html>
