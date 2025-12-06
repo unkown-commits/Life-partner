@@ -4,7 +4,6 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Life Partner</title>
-
   <style>
     :root{
       --pink:#ff4d88;
@@ -103,14 +102,13 @@
       border-radius:10px;
     }
 
-    /* NEW: overlay placed outside/above image (so face not covered)
-       We use bottom:100% to position it just above the image box.
-    */
+    /* overlay placed above the image (so face not covered)
+       using bottom:100% to place overlay box just above the image container */
     .overlayBox{
       position:absolute;
       left:50%;
-      bottom:100%;            /* place above the top edge of the image */
-      transform:translate(-50%, -8px); /* small gap above image */
+      bottom:100%;
+      transform:translate(-50%, -8px);
       text-align:center;
       color:#fff;
       z-index:5000;
@@ -120,7 +118,7 @@
     }
 
     .overlayName{
-      font-size:20px;        /* smaller so it doesn't dominate */
+      font-size:20px;
       font-weight:900;
       margin-bottom:6px;
       background:rgba(0,0,0,0.45);
@@ -163,10 +161,12 @@
 </head>
 <body>
 
+  <!-- toast -->
   <div id="toast" role="status" aria-live="polite">रुको ज़रा — सब्र करो</div>
 
+  <!-- main card -->
   <div class="card" role="main" aria-labelledby="welcomeName">
-  
+    <p>अपना life partner को देखो</p>
     <h1 id="welcomeName">Welcome</h1>
     <p>अपना life partner को देखो</p>
 
@@ -182,15 +182,19 @@
     <div class="modalCard" onclick="event.stopPropagation()">
       <button class="closeBtn" onclick="hideModal()" aria-label="Close image">✕</button>
 
-      <!-- overlay now sits above the image (not on face) -->
+      <!-- overlay (placed above image so face not covered) -->
       <div class="overlayBox" aria-hidden="true">
         <div class="overlayName" id="overlayName">User Name</div>
         <div class="overlaySub">ये है आपका life partner</div>
       </div>
 
+      <!-- image (change filename if required) -->
       <img src="1765008556393.jpg" alt="Life partner">
     </div>
   </div>
+
+  <!-- audio (your uploaded file) -->
+  <audio id="bgMusic" src="audio.mp3" preload="auto"></audio>
 
   <script>
     const openBtn = document.getElementById('openBtn');
@@ -198,12 +202,27 @@
     const toast = document.getElementById('toast');
     const userInput = document.getElementById('userName');
     const overlayName = document.getElementById('overlayName');
+    const bgMusic = document.getElementById('bgMusic');
 
     openBtn.addEventListener('click', () => {
+      // read user input (do not change the "Welcome" header)
       let name = userInput.value.trim();
       if(!name) name = "Unknown";
 
+      // set overlay text (will appear above the image)
       overlayName.textContent = name;
+
+      // play background music (user clicked -> autoplay allowed)
+      // handle promise for browsers that require gesture
+      if(bgMusic){
+        const playPromise = bgMusic.play();
+        if(playPromise !== undefined){
+          playPromise.catch(err => {
+            // if play fails (rare), ignore silently or you can show a message
+            console.log('Audio play failed:', err);
+          });
+        }
+      }
 
       // show toast immediately
       toast.style.display = 'block';
@@ -218,14 +237,21 @@
       }, 3500);
     });
 
+    // hide modal (and stop music)
     function hideModal(){
       modalBG.style.display = 'none';
       modalBG.setAttribute('aria-hidden','true');
+      // pause and reset music
+      try{
+        bgMusic.pause();
+        bgMusic.currentTime = 0;
+      }catch(e){}
     }
 
+    // close on ESC
     document.addEventListener('keydown', (e) => {
       if(e.key === 'Escape') hideModal();
     });
   </script>
 </body>
-</html>
+    </html>
