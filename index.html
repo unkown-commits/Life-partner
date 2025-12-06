@@ -6,132 +6,232 @@
   <title>Life Partner</title>
 
   <style>
-    body{margin:0;font-family:sans-serif;background:#ffeef6;text-align:center;}
+    :root{
+      --pink:#ff4d88;
+      --bg:#ffeef6;
+      --card:#fff;
+    }
+
+    /* Base */
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", Arial;
+      background:var(--bg);
+      color:#222;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      text-align:center;
+    }
 
     .card{
-      margin:20px auto;padding:20px;background:#fff;max-width:600px;
-      border-radius:12px;box-shadow:0 5px 20px rgba(0,0,0,0.1);position:relative;
+      margin:20px auto;
+      padding:20px;
+      background:var(--card);
+      max-width:650px;
+      border-radius:12px;
+      box-shadow:0 8px 30px rgba(0,0,0,0.08);
+      position:relative;
     }
 
-    #welcomeName{font-size:32px;font-weight:900;margin:5px 0;}
+    .card p{margin:6px 0;color:#444;font-weight:700}
+    #welcomeName{font-size:34px;font-weight:900;margin:6px 0}
+
+    input#userName{
+      margin-top:12px;
+      width:78%;
+      padding:10px 12px;
+      font-size:16px;
+      border-radius:8px;
+      border:1px solid #d0cfd2;
+      outline:none;
+    }
 
     .ok-btn{
-      position:absolute;right:20px;top:50%;transform:translateY(-50%);
-      background:#ff4d88;color:#fff;border:none;padding:12px 16px;
-      border-radius:10px;font-weight:800;cursor:pointer;
+      position:absolute;
+      right:18px;
+      top:50%;
+      transform:translateY(-50%);
+      background:var(--pink);
+      color:#fff;
+      border:none;
+      padding:12px 16px;
+      border-radius:10px;
+      font-weight:800;
+      cursor:pointer;
+      box-shadow:0 8px 20px rgba(255,77,136,0.18);
     }
 
-    input{
-      margin-top:10px;width:80%;padding:10px;font-size:16px;
-      border:1px solid #ccc;border-radius:8px;
-    }
-
-    /* Toast */
+    /* small toast message */
     #toast{
-      position:fixed;top:20px;left:50%;transform:translateX(-50%);
-      background:rgba(0,0,0,0.8);color:#fff;padding:10px 16px;
-      border-radius:8px;font-weight:700;display:none;z-index:3000;
+      position:fixed;
+      top:20px;
+      left:50%;
+      transform:translateX(-50%);
+      background:rgba(0,0,0,0.8);
+      color:#fff;
+      padding:10px 16px;
+      border-radius:8px;
+      font-weight:700;
+      display:none;
+      z-index:9999;
     }
 
     /* Modal */
     #modalBG{
-      position:fixed;inset:0;background:rgba(0,0,0,0.6);
-      display:none;align-items:center;justify-content:center;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.62);
+      display:none;
+      align-items:center;
+      justify-content:center;
       z-index:2000;
+      padding:16px;
     }
 
     .modalCard{
-      position:relative;max-width:800px;width:95%;
-      border-radius:12px;overflow:hidden;
+      position:relative;
+      width:100%;
+      max-width:820px;
+      border-radius:12px;
+      overflow:hidden;
+      background:#000;
     }
 
     .modalCard img{
-      width:100%;display:block;
+      display:block;
+      width:100%;
+      height:auto;
+      object-fit:cover;
     }
 
-    /* TEXT OVERLAY EXACTLY ON IMAGE TOP */
+    /* Overlay text positioned near the image top edge */
     .overlayBox{
-      position:absolute;top:20px;left:50%;transform:translateX(-50%);
-      text-align:center;color:#fff;text-shadow:0 4px 15px rgba(0,0,0,0.8);
+      position:absolute;
+      top:8px;                /* small distance from top edge of modalCard */
+      left:50%;
+      transform:translateX(-50%);
+      text-align:center;
+      color:#fff;
       z-index:5000;
+      width:90%;
+      pointer-events:none;    /* so overlay doesn't block close button or taps */
+      text-shadow:0 4px 12px rgba(0,0,0,0.7);
     }
 
     .overlayName{
-      font-size:32px;font-weight:900;margin-bottom:6px;
+      font-size:22px;        /* reduced size so it doesn't cover face */
+      font-weight:900;
+      line-height:1.05;
+      margin-bottom:6px;
     }
 
     .overlaySub{
-      font-size:20px;font-weight:700;background:rgba(0,0,0,0.4);
-      padding:4px 10px;border-radius:8px;display:inline-block;
+      font-size:14px;
+      font-weight:700;
+      background:rgba(0,0,0,0.38);
+      padding:6px 10px;
+      border-radius:6px;
+      display:inline-block;
     }
 
+    /* Close button sits above overlay */
     .closeBtn{
-      position:absolute;right:10px;top:10px;background:rgba(255,255,255,0.9);
-      border:0;padding:6px 10px;border-radius:6px;font-weight:900;
-      cursor:pointer;z-index:6000;
+      position:absolute;
+      right:10px;
+      top:10px;
+      background:rgba(255,255,255,0.95);
+      border:0;
+      padding:6px 10px;
+      border-radius:8px;
+      font-weight:800;
+      cursor:pointer;
+      z-index:6000;
     }
 
+    /* Responsive tweaks */
+    @media (max-width:520px){
+      #welcomeName{font-size:28px}
+      .overlayName{font-size:18px}
+      .overlaySub{font-size:13px}
+      input#userName{width:68%}
+    }
   </style>
 </head>
 <body>
 
-<div id="toast">रुको ज़रा — सब्र करो</div>
+  <div id="toast" role="status" aria-live="polite">रुको ज़रा — सब्र करो</div>
 
-<div class="card">
+  <div class="card" role="main" aria-labelledby="welcomeName">
 
-  <h1 id="welcomeName">Welcome</h1>
+    <!-- fixed welcome text -->
+    <h1 id="welcomeName">Welcome</h1>
 
-  <p>अपना life partner को देखो</p>
+    <p>अपना life partner को देखो</p>
 
-  <button class="ok-btn" id="openBtn">OK</button>
+    <button class="ok-btn" id="openBtn" aria-label="Open image">OK</button>
 
-  <input id="userName" type="text" placeholder="अपना नाम लिखिए...">
-</div>
-
-<!-- MODAL -->
-<div id="modalBG" onclick="hideModal()">
-  <div class="modalCard" onclick="event.stopPropagation()">
-
-    <button class="closeBtn" onclick="hideModal()">✕</button>
-
-    <!-- OVERLAY TEXT -->
-    <div class="overlayBox">
-      <div class="overlayName" id="overlayName">User Name</div>
-      <div class="overlaySub">ये है आपका life partner</div>
+    <!-- only input, no set button -->
+    <div>
+      <input id="userName" type="text" placeholder="अपना नाम लिखिए..." aria-label="Enter your name">
     </div>
-
-    <img src="1765008556393.jpg">
   </div>
-</div>
 
-<script>
-const openBtn   = document.getElementById('openBtn');
-const modalBG   = document.getElementById('modalBG');
-const toast     = document.getElementById('toast');
-const userInput = document.getElementById('userName');
-const overlayName = document.getElementById('overlayName');
+  <!-- Modal -->
+  <div id="modalBG" role="dialog" aria-modal="true" aria-hidden="true" onclick="hideModal()">
+    <div class="modalCard" onclick="event.stopPropagation()">
+      <!-- close -->
+      <button class="closeBtn" onclick="hideModal()" aria-label="Close image">✕</button>
 
-openBtn.addEventListener('click', () => {
+      <!-- overlay text (positioned at top edge of the image) -->
+      <div class="overlayBox" aria-hidden="true">
+        <div class="overlayName" id="overlayName">User Name</div>
+        <div class="overlaySub">ये है आपका life partner</div>
+      </div>
 
-  let name = userInput.value.trim();
-  if(!name){
-    name = "Unknown User";
-  }
+      <!-- image (change filename if yours is different) -->
+      <img src="1765008556393.jpg" alt="Life Partner">
+    </div>
+  </div>
 
-  overlayName.innerText = name;
+  <script>
+    const openBtn = document.getElementById('openBtn');
+    const modalBG = document.getElementById('modalBG');
+    const toast = document.getElementById('toast');
+    const userInput = document.getElementById('userName');
+    const overlayName = document.getElementById('overlayName');
 
-  toast.style.display = "block";
-  setTimeout(()=> toast.style.display="none", 3000);
+    openBtn.addEventListener('click', () => {
+      // get name from input (do not change the "Welcome" header)
+      let name = userInput.value.trim();
+      if(!name) name = "Unknown";
 
-  setTimeout(()=> {
-    modalBG.style.display = "flex";
-  }, 3500);
-});
+      // update overlay text (this will appear at image top)
+      overlayName.textContent = name;
 
-function hideModal(){
-  modalBG.style.display = "none";
-}
-</script>
+      // show immediate toast
+      toast.style.display = 'block';
+      // hide toast slightly before modal opens
+      setTimeout(()=> { toast.style.display = 'none'; }, 3000);
 
+      // delay before opening image (3.5s)
+      setTimeout(()=> {
+        modalBG.style.display = 'flex';
+        modalBG.setAttribute('aria-hidden','false');
+        // scroll to top on mobile so overlay aligns (small delay)
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 3500);
+    });
+
+    // hide modal function
+    function hideModal(){
+      modalBG.style.display = 'none';
+      modalBG.setAttribute('aria-hidden','true');
+    }
+
+    // close on ESC
+    document.addEventListener('keydown', (e) => {
+      if(e.key === 'Escape') hideModal();
+    });
+  </script>
 </body>
-</html>
+  </html>
